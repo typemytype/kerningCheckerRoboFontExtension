@@ -24,5 +24,12 @@
 	<real>1456307610.6527879</real>
 	<key>version</key>
 	<string>1.0</string>
+	<key>com.robofontmechanic.Mechanic</key>
+	<dict>
+		<key>repository</key>
+		<string>typemytype/kerningCheckerRoboFontExtension</string>
+		<key>summary</key>
+		<string>Checks kerning in the UFO file and compares it with the generated binary file (otf, ttf only).</string>
+	</dict>
 </dict>
 </plist>
