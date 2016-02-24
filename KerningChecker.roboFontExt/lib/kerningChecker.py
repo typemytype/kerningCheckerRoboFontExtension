@@ -27,6 +27,6 @@ class KerningChecker(object):
         ufoKerning = UFOkernReader(font)
 
         if ufoKerning.allKerningPairs != binaryKerning.kerningPairs:
-            vanilla.dialogs.message("Kerning Checker", u"Hey – you have kerning within your OT features. The output might not be what you expect!")
+            vanilla.dialogs.message("Kerning Checker", "Hey, you have kerning within your OT features. The output might not be what you expect!")
 
 KerningChecker()
