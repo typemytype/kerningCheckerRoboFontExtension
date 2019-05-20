@@ -28,32 +28,28 @@ class UFOkernReader(object):
         self.totalKerning = sum(self.allKerningPairs.values())
         self.absoluteKerning = sum([abs(value) for value in self.allKerningPairs.values()])
 
-
     def allCombinations(self, left, right):
         leftGlyphs = self.f.groups.get(left, [left])
         rightGlyphs = self.f.groups.get(right, [right])
         combinations = list(itertools.product(leftGlyphs, rightGlyphs))
         return combinations
 
-
     def makePairDicts(self, includeZero=False):
         kerningPairs = {}
 
         for (left, right), value in self.f.kerning.items():
 
-            if '@' in left and '@' in right:
+            if 'public.kern1.' in left and 'public.kern2.' in right:
                 # group-to-group-pair
                 for combo in self.allCombinations(left, right):
                     self.group_group_pairs[combo] = value
 
-
-            elif '@' in left and not '@' in right:
+            elif 'public.kern1.' in left and 'public.kern2.' not in right:
                 # group-to-glyph-pair
                 for combo in self.allCombinations(left, right):
                     self.group_glyph_pairs[combo] = value
 
-
-            elif not '@' in left and '@' in right:
+            elif 'public.kern1.' not in left and 'public.kern2.' in right:
                 # glyph-to-group-pair
                 for combo in self.allCombinations(left, right):
                     self.glyph_group_pairs[combo] = value
@@ -71,7 +67,6 @@ class UFOkernReader(object):
         kerningPairs.update(self.glyph_group_pairs)
         kerningPairs.update(self.glyph_glyph_pairs)
 
-
         if includeZero == False:
             # delete any kerning values == 0.
             # This cannot be done in the loop, since exceptions might undo a previously set kerning pair to be 0.
@@ -83,7 +78,6 @@ class UFOkernReader(object):
 
         else:
             return kerningPairs
-
 
 
 def run(font):
@@ -98,10 +92,10 @@ def run(font):
         # print 'Total length of kerning:', ukr.totalKerning
 
     if inCL:
-        print '\n'.join(ukr.output), '\n'
+        print('\n'.join(ukr.output), '\n')
 
-    print 'Total amount of kerning pairs:', len(ukr.output)
-    print 'List of kerning pairs copied to clipboard.'
+    print('Total amount of kerning pairs:', len(ukr.output))
+    print('List of kerning pairs copied to clipboard.')
 
 
 if __name__ == '__main__':
@@ -115,7 +109,7 @@ if __name__ == '__main__':
         if f:
             run(f)
         else:
-            print u'You need to open a font first. \U0001F625'
+            print('You need to open a font first. \U0001F625')
 
     except ImportError:
         try:
@@ -126,9 +120,7 @@ if __name__ == '__main__':
                 f = defcon.Font(path)
                 run(f)
             else:
-                print 'No UFO file given.'
+                print('No UFO file given.')
         except ImportError:
-            print u'You don’t have Defcon installed. \U0001F625'
-
-
+            print('You don’t have Defcon installed. \U0001F625')
 

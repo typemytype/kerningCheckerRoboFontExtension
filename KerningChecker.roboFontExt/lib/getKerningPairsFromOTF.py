@@ -17,12 +17,14 @@ finalList = []
 
 
 class myLeftClass:
+
     def __init__(self):
         self.glyphs = []
         self.class1Record = 0
 
 
 class myRightClass:
+
     def __init__(self):
         self.glyphs = []
         self.class2Record = 0
@@ -55,7 +57,7 @@ class ReadKerning(object):
         self.allRightClasses = {}
 
         if kGPOStableName not in self.font:
-            print "The font has no %s table" % kGPOStableName
+            print("The font has no %s table" % kGPOStableName)
             self.goodbye()
 
         else:
@@ -65,11 +67,9 @@ class ReadKerning(object):
             self.getSinglePairs()
             self.getClassPairs()
 
-
     def goodbye(self):
-        print 'The fun ends here.'
+        print('The fun ends here.')
         return
-
 
     def analyzeFont(self):
         self.gposTable = self.font[kGPOStableName].table
@@ -84,10 +84,9 @@ class ReadKerning(object):
 
         self.uniqueKernLookupIndexList = collectUniqueKernLookupListIndexes(self.featureRecord)
 
-
     def findKerningLookups(self):
         if not len(self.uniqueKernLookupIndexList):
-            print "The font has no %s feature." % kKernFeatureTag
+            print("The font has no %s feature." % kKernFeatureTag)
             self.goodbye()
 
         'LookupList:'
@@ -113,11 +112,12 @@ class ReadKerning(object):
             '''
 
             if lookup.LookupType not in [2, 9]:
-                print '''
+                message = '''
                 Info: GPOS LookupType %s found.
                 This type is neither a pair adjustment positioning lookup (GPOS LookupType 2),
                 nor using an extension table (GPOS LookupType 9), which are the only supported ones.
                 ''' % lookup.LookupType
+                print(message)
                 continue
             self.lookups.append(lookup)
 
@@ -131,29 +131,26 @@ class ReadKerning(object):
 
                 elif subtableItem.LookupType == 9: # extension table
                     if subtableItem.ExtensionLookupType == 8: # contextual
-                        print 'Contextual Kerning not (yet?) supported.'
+                        print('Contextual Kerning not (yet?) supported.')
                         continue
                     elif subtableItem.ExtensionLookupType == 2:
                         pairPos = subtableItem.ExtSubTable
 
-
                 # if pairPos.Coverage.Format not in [1, 2]:
                 if pairPos.Format not in [1, 2]:
-                    print "WARNING: Coverage format %d is not yet supported." % pairPos.Coverage.Format
+                    print("WARNING: Coverage format %d is not yet supported." % pairPos.Coverage.Format)
 
                 if pairPos.ValueFormat1 not in [0, 4, 5]:
-                    print "WARNING: ValueFormat1 format %d is not yet supported." % pairPos.ValueFormat1
+                    print("WARNING: ValueFormat1 format %d is not yet supported." % pairPos.ValueFormat1)
 
                 if pairPos.ValueFormat2 not in [0]:
-                    print "WARNING: ValueFormat2 format %d is not yet supported." % pairPos.ValueFormat2
-
+                    print("WARNING: ValueFormat2 format %d is not yet supported." % pairPos.ValueFormat2)
 
                 self.pairPosList.append(pairPos)
 
                 # Each glyph in this list will have a corresponding PairSet which will
                 # contain all the second glyphs and the kerning value in the form of PairValueRecord(s)
                 # self.firstGlyphsList.extend(pairPos.Coverage.glyphs)
-
 
     def getSinglePairs(self):
         for pairPos in self.pairPosList:
@@ -168,20 +165,18 @@ class ReadKerning(object):
                         secondGlyph = pairValueRecordItem.SecondGlyph
                         valueFormat = pairPos.ValueFormat1
 
-
-                        if valueFormat == 5: # RTL kerning
+                        if valueFormat == 5:  # RTL kerning
                             kernValue = "<%d 0 %d 0>" % (pairValueRecordItem.Value1.XPlacement, pairValueRecordItem.Value1.XAdvance)
-                        elif valueFormat == 0: # RTL pair with value <0 0 0 0>
+                        elif valueFormat == 0:  # RTL pair with value <0 0 0 0>
                             kernValue = "<0 0 0 0>"
-                        elif valueFormat == 4: # LTR kerning
+                        elif valueFormat == 4:  # LTR kerning
                             kernValue = pairValueRecordItem.Value1.XAdvance
                         else:
-                            print "\tValueFormat1 = %d" % valueFormat
-                            continue # skip the rest
+                            print("\tValueFormat1 = %d" % valueFormat)
+                            continue  # skip the rest
 
                         self.kerningPairs[(firstGlyphsList[pairSetIndex], secondGlyph)] = kernValue
                         self.singlePairs[(firstGlyphsList[pairSetIndex], secondGlyph)] = kernValue
-
 
     def getClassPairs(self):
         for loop, pairPos in enumerate(self.pairPosList):
@@ -189,7 +184,6 @@ class ReadKerning(object):
 
                 leftClasses = {}
                 rightClasses = {}
-
 
                 # # Find left class with the Class1Record index="0".
                 # # This first class is mixed into the "Coverage" table (e.g. all left glyphs)
@@ -245,7 +239,7 @@ class ReadKerning(object):
                             elif valueFormat == 0: # valueFormat zero is caused by a value of <0 0 0 0> on a class-class pair; skip these
                                 continue
                             else:
-                                print "\tValueFormat1 = %d" % valueFormat
+                                print("\tValueFormat1 = %d" % valueFormat)
                                 continue # skip the rest
 
                             if kernValue != 0:
@@ -263,14 +257,10 @@ class ReadKerning(object):
                                             if valueFormat == 5: # RTL kerning
                                                 kernValue = "<%d 0 %d 0>" % (pairPos.Class1Record[record_l].Class2Record[record_r].Value1.XPlacement, pairPos.Class1Record[record_l].Class2Record[record_r].Value1.XAdvance)
 
-
                                             self.kerningPairs[(l, r)] = kernValue
 
                         else:
-                            print 'ERROR'
-
-
-
+                            print('ERROR')
 
 
 if __name__ == "__main__":
@@ -288,14 +278,14 @@ if __name__ == "__main__":
             finalList.sort()
 
             output = '\n'.join(finalList)
-            print output
+            print(output)
 
-            print '\nTotal number of kerning pairs:'
-            print len(f.kerningPairs)
+            print('\nTotal number of kerning pairs:')
+            print(len(f.kerningPairs))
             # for i in sorted(f.allLeftClasses):
             #     print i, f.allLeftClasses[i]
 
         else:
-            print 'That is not a valid font.'
+            print('That is not a valid font.')
     else:
-        print 'Please provide a font.'
+        print('Please provide a font.')

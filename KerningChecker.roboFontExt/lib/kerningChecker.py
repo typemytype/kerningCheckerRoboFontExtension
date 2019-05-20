@@ -19,8 +19,8 @@ class KerningChecker(object):
             (key, dict_b.get(key, dict_a.get(key)))
             for key in set(dict_a.keys()+dict_b.keys())
             if (
-                (key in dict_a and (not key in dict_b or dict_a[key] != dict_b[key])) or
-                (key in dict_b and (not key in dict_a or dict_a[key] != dict_b[key]))
+                (key in dict_a and (key not in dict_b or dict_a[key] != dict_b[key])) or
+                (key in dict_b and (key not in dict_a or dict_a[key] != dict_b[key]))
             )
         ])
 
@@ -42,11 +42,11 @@ class KerningChecker(object):
         if ufoKerning.allKerningPairs != binaryKerning.kerningPairs:
             #creates a diff of binary pairs vs UFO pairs
             diff = self.dict_diff(ufoPairs, binaryPairs)
-            
-            output = 'Hey, you have ' + str(len(diff)) ' missing kerning pairs:\n' + str(diff)
+
+            output = 'Hey, you have ' + str(len(diff)) + ' missing kerning pairs:\n' + str(diff)
             #prints to output window
-            print output
-            #displays in dialog. Should this be limited somehow if it is really long? 
+            print(output)
+            #displays in dialog. Should this be limited somehow if it is really long?
             vanilla.dialogs.message(output)
 
             #vanilla.dialogs.message("Kerning Checker", "Hey, you have kerning within your OT features. The output might not be what you expect!")
