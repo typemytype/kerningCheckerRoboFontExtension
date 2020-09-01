@@ -5,7 +5,7 @@ import vanilla
 from mojo.events import addObserver
 
 # taken from https://github.com/adobe-type-tools/kern-dump
-from getKerningPairsFromOTF import ReadKerning
+from getKerningPairsFromOTF import OTFKernReader
 from getKerningPairsFromUFO import UFOkernReader
 
 
@@ -33,7 +33,7 @@ class KerningChecker(object):
         if not os.path.exists(path):
             return
 
-        binaryKerning = ReadKerning(path)
+        binaryKerning = OTFKernReader(path)
         ufoKerning = UFOkernReader(font)
 
         ufoPairs = ufoKerning.allKerningPairs
