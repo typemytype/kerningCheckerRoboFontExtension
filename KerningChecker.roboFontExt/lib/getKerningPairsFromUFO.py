@@ -1,32 +1,41 @@
-#!/usr/bin/python
-# coding: utf-8
-
-# taken as is from https://github.com/adobe-type-tools/kern-dump/blob/master/getKerningPairsFromUFO.py
-
-import sys
-import os
+#!/usr/bin/env python3
 import itertools
+import os
+import sys
 
 
 class UFOkernReader(object):
 
-    def __init__(self, font):
+    def __init__(self, font, includeZero=False):
         self.f = font
+
+        try:
+            format_version = self.f.ufoFormatVersion
+        except AttributeError:
+            format_version = self.f.naked().ufoFormatVersion
+        if format_version >= 3:
+            self.group_indicator = 'public.'
+        else:
+            self.group_indicator = '@'
+
         self.group_group_pairs = {}
         self.group_glyph_pairs = {}
         self.glyph_group_pairs = {}
         self.glyph_glyph_pairs = {}
 
-        self.allKerningPairs = self.makePairDicts()
-        self.allKerningPairs_zero = self.makePairDicts(includeZero=True)
-        self.output = []
-
-        for (left, right), value in self.allKerningPairs.items():
-            self.output.append('/%s /%s %s' % (left, right, value))
-        self.output.sort()
+        self.allKerningPairs = self.makePairDicts(includeZero)
+        self.output = self.makeOutput(self.allKerningPairs)
 
         self.totalKerning = sum(self.allKerningPairs.values())
-        self.absoluteKerning = sum([abs(value) for value in self.allKerningPairs.values()])
+        self.absoluteKerning = sum(
+            [abs(value) for value in self.allKerningPairs.values()])
+
+    def makeOutput(self, kerningDict):
+        output = []
+        for (left, right), value in kerningDict.items():
+            output.append('/%s /%s %s' % (left, right, value))
+        output.sort()
+        return output
 
     def allCombinations(self, left, right):
         leftGlyphs = self.f.groups.get(left, [left])
@@ -34,22 +43,31 @@ class UFOkernReader(object):
         combinations = list(itertools.product(leftGlyphs, rightGlyphs))
         return combinations
 
-    def makePairDicts(self, includeZero=False):
+    def makePairDicts(self, includeZero):
         kerningPairs = {}
 
         for (left, right), value in self.f.kerning.items():
 
-            if 'public.kern1.' in left and 'public.kern2.' in right:
+            if (
+                self.group_indicator in left and
+                self.group_indicator in right
+            ):
                 # group-to-group-pair
                 for combo in self.allCombinations(left, right):
                     self.group_group_pairs[combo] = value
 
-            elif 'public.kern1.' in left and 'public.kern2.' not in right:
+            elif (
+                self.group_indicator in left and
+                self.group_indicator not in right
+            ):
                 # group-to-glyph-pair
                 for combo in self.allCombinations(left, right):
                     self.group_glyph_pairs[combo] = value
 
-            elif 'public.kern1.' not in left and 'public.kern2.' in right:
+            elif (
+                self.group_indicator not in left and
+                self.group_indicator in right
+            ):
                 # glyph-to-group-pair
                 for combo in self.allCombinations(left, right):
                     self.glyph_group_pairs[combo] = value
@@ -57,7 +75,6 @@ class UFOkernReader(object):
             else:
                 # glyph-to-glyph-pair a.k.a. single pair
                 self.glyph_glyph_pairs[(left, right)] = value
-
 
         # The updates occur from the most general pairs to the most specific.
         # This means that any given class kerning values are overwritten with
@@ -67,9 +84,10 @@ class UFOkernReader(object):
         kerningPairs.update(self.glyph_group_pairs)
         kerningPairs.update(self.glyph_glyph_pairs)
 
-        if includeZero == False:
+        if includeZero is False:
             # delete any kerning values == 0.
-            # This cannot be done in the loop, since exceptions might undo a previously set kerning pair to be 0.
+            # This cannot be done in the previous loop, since exceptions
+            # might set a previously established kerning pair to be 0.
             cleanKerningPairs = dict(kerningPairs)
             for pair in kerningPairs:
                 if kerningPairs[pair] == 0:
@@ -81,7 +99,7 @@ class UFOkernReader(object):
 
 
 def run(font):
-    ukr = UFOkernReader(font)
+    ukr = UFOkernReader(font, includeZero=True)
     scrap = os.popen('pbcopy', 'w')
     output = '\n'.join(ukr.output)
     scrap.write(output)
@@ -89,7 +107,7 @@ def run(font):
 
     if inRF:
         pass
-        # print 'Total length of kerning:', ukr.totalKerning
+        # print('Total length of kerning:', ukr.totalKerning)
 
     if inCL:
         print('\n'.join(ukr.output), '\n')
@@ -109,18 +127,17 @@ if __name__ == '__main__':
         if f:
             run(f)
         else:
-            print('You need to open a font first. \U0001F625')
+            print(u'You need to open a font first. \U0001F625')
 
     except ImportError:
         try:
             import defcon
             inCL = True
-            path = sys.argv[-1].rstrip(os.sep)
+            path = os.path.normpath(sys.argv[-1])
             if os.path.splitext(path)[-1] in ['.ufo', '.UFO']:
                 f = defcon.Font(path)
                 run(f)
             else:
                 print('No UFO file given.')
         except ImportError:
-            print('You don’t have Defcon installed. \U0001F625')
-
+            print(u'You don’t have Defcon installed. \U0001F625')
