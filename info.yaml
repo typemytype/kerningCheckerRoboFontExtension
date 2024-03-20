@@ -1,0 +1,10 @@
+name: KerningChecker
+developer: TypeMyType
+developerURL: http://typemytype.com
+launchAtStartUp: true
+mainScript: kerningChecker.py
+version: '1.3'
+addToMenu: []
+html: false
+requiresVersionMajor: '1'
+requiresVersionMinor: '6'
