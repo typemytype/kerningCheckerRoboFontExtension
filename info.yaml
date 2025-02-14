@@ -3,7 +3,7 @@ developer: TypeMyType
 developerURL: http://typemytype.com
 launchAtStartUp: true
 mainScript: kerningChecker.py
-version: '1.3'
+version: '1.4'
 addToMenu: []
 html: false
 requiresVersionMajor: '1'
